@@ -11,9 +11,9 @@ const windowHeight = Dimensions.get('window').height;
 
 const colors = {
   color1: [248,88,255],
-  color2: [87, 0, 93],
+  color2: [0, 255, 0],
   color3: [81,1,186],
-  color4: [85,0,191]
+  color4: [255,0,0]
 }
 
 // in gl-react you need to statically define "shaders":
@@ -24,10 +24,12 @@ const shaders = Shaders.create({
 frag: GLSL`
 precision highp float;
 varying vec2 uv;
-uniform vec3 start, end;
+uniform vec3 topleft, topright, bottomleft, bottomright;
 void main() {
-  vec3 color = mix(end, start, 0.5);
-  gl_FragColor = vec4(color, 1.0);
+  vec3 mix1 = mix(topleft, topright, uv.y);
+  vec3 mix2 = mix(bottomleft, bottomright, uv.y);
+  vec3 final = mix(mix1, mix2, uv.x);
+  gl_FragColor = vec4(final, 1.0);
 }
 `
 // the main() function is called FOR EACH PIXELS
@@ -42,7 +44,7 @@ export default class TabTwoScreen extends Component {
     const { color1, color2, color3, color4 } = colors;
     return (
         <Surface style={{width: windowWidth, height: windowHeight}}>
-          <Node shader={shaders.helloGL} uniforms={{start: color1.map(v=>v/255), end: color2.map(v=>v/255)}} />
+          <Node shader={shaders.helloGL} uniforms={{topleft: color1.map(v=>v/255), topright: color2.map(v=>v/255), bottomleft: color3.map(v=>v/255), bottomright: color4.map(v=>v/255)}} />
         </Surface>
     );
 // Surface creates the canvas, an area of pixels where you can draw.
