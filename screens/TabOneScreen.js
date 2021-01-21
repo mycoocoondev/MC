@@ -1,174 +1,103 @@
+import React, { Component } from 'react';
+import { View, StyleSheet } from 'react-native';
+import {GLView} from 'expo-gl';
 
-import React, {Component, Fragment} from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,Dimensions
-} from 'react-native';
-import {Header, Colors} from 'react-native/Libraries/NewAppScreen';
+const vertSrc = `
+attribute vec2 position;
+varying vec2 uv;
+void main() {
+  gl_Position = vec4(position.x, -position.y, 0.0, 1.0);
+  uv = vec2(0.5, 0.5) * (position+vec2(1.0, 1.0));
+}`;
 
+const fragSrc = `
+precision highp float;
+varying vec2 uv;
+void main ()
+ {
+  gl_FragColor = vec4(uv.x, uv.y, 0.5, 1.0);
+}`;
 
-import Svg, {
-  Circle,
-  Defs,
-  G,
-  LinearGradient,
-  Path,
-  Stop,
-  Rect,
-  Mask
-} from "react-native-svg";
+export default class App extends Component {
+    _onContextCreate = (gl) => {
+    // Compile vertex and fragment shader
+    const vert = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vert, vertSrc);
+    gl.compileShader(vert);
+    const frag = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(frag, fragSrc);
+    gl.compileShader(frag);
 
+    // Link together into a program
+    const program = gl.createProgram();
+    gl.attachShader(program, vert);
+    gl.attachShader(program, frag);
+    gl.linkProgram(program);
 
+    // Save position attribute
+    const positionAttrib = gl.getAttribLocation(program, 'position');
 
-//import LinearGradient from 'react-native-linear-gradient';
+    // Create buffer
+    const buffer = gl.createBuffer();
 
-const { width } = Dimensions.get("window");
-const {height } = Dimensions.get("window");
+    // Animate!
+    let skip = false;
+    const animate = () => {
+      try {
+        if (skip) {
+          // return;
+        }
 
-export default class TabOneScreen extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      count: 0,
-      colorTop: '#000000',
-      colorBottom: '#cccccc',
-      x1: 0,
-      y1: 0,
-      x2: width,
-      y2: 0,
-      x3: 0,
-      y3: height/2,
-      x4: width,
-      y4: height/2,
-      x5: 0,
-      y5: height,
-      x6: width,
-      y6: height,
-      color1: '#000000',
-      color2: '#cccccc',
-      color3: '#bb4411',
-      color4: '#9932cc',
-      color5: '#e6e4d9',
-      color6: '#ffc173',
-      
+        // Clear
+        gl.clearColor(0, 0, 1, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // Bind buffer, program and position attribute for use
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.useProgram(program);
+        gl.enableVertexAttribArray(positionAttrib);
+        gl.vertexAttribPointer(positionAttrib, 2, gl.FLOAT, false, 0, 0);
+
+        // Buffer data and draw!
+        const speed = this.props.speed || 1;
+        const a = 0.48 * Math.sin(0.001 * speed * Date.now()) + 0.5;
+        const verts = new Float32Array([
+          -a, -a, a, -a, -a,  a,
+          -a,  a, a, -a,  a,  a,
+        ]);
+        gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+        gl.drawArrays(gl.TRIANGLES, 0, verts.length / 2);
+
+        // Submit frame
+        gl.flush();
+        gl.endFrameEXP();
+      } finally {
+        skip = !skip;
+        gl.enableLogging = false;
+        requestAnimationFrame(animate);
+      }
     };
-  }
-
-  incrementColor = (color, step) => {
-    const intColor = parseInt(color.substr(1), 16);
-    const newIntColor = (intColor + step).toString(16);
-    return `#${'0'.repeat(6 - newIntColor.length)}${newIntColor}`;
-  };
-
-  componentDidMount() {
-    setInterval(() => {
-      this.setState({
-        count: this.state.count + 1,
-        /* x1 : this.styarn ate.x1+count;
-        y1 : this.state.y1+count;
-        x2 : this.state.x2+count;
-        y2 : this.state.y2+count;
-        x1 : this.state.y3+count;
-        x1 : this.state.y3+count;
-        x1 : this.state.x1+count;
- */
-        color1: this.incrementColor(this.state.color1, 1),
-        color2: this.incrementColor(this.state.color2, -1),
-        color3: this.incrementColor(this.state.color3, 1),
-        color4: this.incrementColor(this.state.color4, -1),
-        color5: this.incrementColor(this.state.color5, 1),
-        color6: this.incrementColor(this.state.color6, -1),
-        
-      });
-    }, 20);
+    animate();
   }
 
   render() {
-    const {x1,y1, x2,y2, x3,y3, x4,y4, x5,y5, x6,y6} = this.state;
-    const {color1, color2, color3, color4, color5, color6} = this.state;
     return (
-      <Fragment>
-        
-        <SafeAreaView>
-          
-            <View style={styles.body}>
-            <Svg  preserveAspectRatio='none' viewBox='0 0 1 1'  >
-              <Defs>
-                   <LinearGradient id='g' x1="0" y1="0" x2="0" y2="1"
-                      >
-                      <Stop
-                          stopColor='white'
-                          offset='0%'
-                          stopOpacity='0'
-                    />
-                    <Stop
-                          stopColor='white'
-                          offset='1'
-                          stopOpacity='1'
-                    />
-                  </LinearGradient>
-                  <Mask id='m'>
-                    <Rect x='0' y='0' width='1' height='1' fill='url(#g)'/>
-                  </Mask>  
-                   <LinearGradient id="a" x1="0" y1="0" x2="0" y2="1" >
-                      <Stop
-                          stopColor='red'
-                          offset='0%'
-                          stopOpacity='1'
-                    />
-                    <Stop
-                          stopColor='green'
-                          offset='100%'
-                          stopOpacity='1'
-                    />
-                  </LinearGradient>
-                <LinearGradient id='b' x1="0" y1="0" x2="0" y2="1"
-                      >
-                      <Stop
-                          stopColor='blue'
-                          offset='0%'
-                          stopOpacity='1'
-                    />
-                    <Stop
-                          stopColor='yellow'
-                          offset='100%'
-                          stopOpacity='1'
-                    />
-                  </LinearGradient>
-
-            </Defs>
-             <Rect x='0' y='0' width='1' height='1' fill='url(#a)' mask='url(#m)'/> 
-             {/* <Rect x='0' y='0' width='1' height='1' fill='url(#b)' mask='url(#m)' transform='translate(1,1) rotate(180)'/>    */}
-           </Svg>
-            
-             </View>
-        </SafeAreaView>
-      </Fragment>
+      <View style={styles.container}>
+        <GLView
+          style={StyleSheet.absoluteFill}
+          onContextCreate={this._onContextCreate}
+        />
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 45,
+    backgroundColor: '#ecf0f1',
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  gradient: {
-    width: width,
-    height: height,
-  },
-
 });
