@@ -74,7 +74,7 @@ export default class App extends Component {
       } finally {
         skip = !skip;
         gl.enableLogging = false;
-        requestAnimationFrame(animate);
+        //requestAnimationFrame(animate);
       }
     };
     animate();
