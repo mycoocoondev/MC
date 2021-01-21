@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet } from 'react-native';
-import { Shaders, Node, GLSL, Surface } from "gl-react";
+import { Shaders, GLSL, Node } from "gl-react";
+import { Surface } from "gl-react-expo";
 
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Text, View } from '../components/Themed';
@@ -27,28 +28,11 @@ void main() {
 export default class TabTwoScreen extends Component {
   render() {
     return (
-      <Surface width={300} height={300}>
-        <Node shader={shaders.helloGL} />
-      </Surface>
+        <Surface style={{width: 300, height: 300}}>
+          <Node shader={shaders.helloGL} />
+        </Surface>
     );
 // Surface creates the canvas, an area of pixels where you can draw.
 // Node instanciates a "shader program" with the fragment shader defined above.
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: '80%',
-  },
-});
