@@ -60,7 +60,7 @@ export default class TabTwoScreen extends Component {
       clearInterval(this.myInterval);
       console.log("Stopped!");
     }
-  }, 100);
+  }, 50);
 
   render() {
     const { color1, color2, color3, color4, color5, color6 } = this.state.colors;
