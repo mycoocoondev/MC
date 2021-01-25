@@ -11,22 +11,28 @@ const { frames } = imageJSON;
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 console.log("Total frames:", frames.length);
+console.log(frames[2999]);
 let frame = 0;
 
 const shaders = Shaders.create({
   helloGL: {
     frag: GLSL`
 precision highp float;
+float step1 = 0.50;
+float x = smoothstep(0.20, 0.20, gl_FragCoord.y);
 varying vec2 uv;
 uniform vec3 topleft, topright, bottomleft, bottomright, middleleft, middleright;
 void main() {
-  vec3 mix1 = mix(middleleft, topleft, uv.y);
-  vec3 mix2 = mix(middleright, topright, uv.y);
-  vec3 mix3 = mix(bottomleft, middleleft, uv.y);
-  vec3 mix4 = mix(bottomright, middleright, uv.y);
-  vec3 topfinal = mix(mix1, mix2, uv.x);
-  vec3 bottomfinal = mix(mix3, mix4, uv.x);
-  gl_FragColor = vec4(topfinal, 1.0);
+  float percent = uv.y;
+  float step1 = 0.0;
+  float step2 = 0.5;
+  float step3 = 1.0;
+  vec3 mix1 = mix(middleleft, topleft, smoothstep(step1, step2, uv.y));
+  mix1 = mix(mix1, bottomleft, smoothstep(step2, step3, uv.y));
+  vec3 mix2 = mix(middleright, topright, smoothstep(step1, step2, uv.y));
+  mix2 = mix(mix2, bottomright, smoothstep(step2, step3, uv.y));
+  vec3 final = mix(mix1, mix2, uv.x);
+  gl_FragColor = vec4(final, 1.0);
 }
 `,
   },
@@ -37,30 +43,32 @@ export default class TabTwoScreen extends Component {
     super(props);
     this.state = {
       colors: {
-        color1: [255, 255, 255],
-        color2: [0, 255, 0],
-        color3: [81, 1, 186],
-        color4: [0, 0, 0],
-        color5: [255, 0, 0],
-        color6: [0, 0, 255],
+        color1: [0, 0, 255], //blue
+        color2: [0, 255, 0], //green
+        color3: [255, 0, 0], //red
+        color4: [0, 255, 255], //cyan
+        color5: [255, 255, 0], //yellow
+        color6: [255, 0, 255], //violet
       },
     };
   }
 
-/*   myInterval = setInterval(() => {
+   myInterval = setInterval(() => {
     const newColors = { ...this.state.colors };
     newColors.color1 = frames[frame][0];
     newColors.color2 = frames[frame][1];
     newColors.color3 = frames[frame][2];
     newColors.color4 = frames[frame][3];
+    newColors.color5 = frames[frame][4];
+    newColors.color6 = frames[frame][5];
     frame = frame + 1;
     console.log(frame);
     this.setState({ colors: newColors });
-    if (frame > 1000) {
+    if (frame > frames.length) {
       clearInterval(this.myInterval);
       console.log("Stopped!");
     }
-  }, 50); */
+  }, 25);
 
   render() {
     const { color1, color2, color3, color4, color5, color6 } = this.state.colors;
