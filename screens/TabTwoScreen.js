@@ -47,7 +47,7 @@ export default class TabTwoScreen extends Component {
     };
   }
 
-  myInterval = setInterval(() => {
+/*   myInterval = setInterval(() => {
     const newColors = { ...this.state.colors };
     newColors.color1 = frames[frame][0];
     newColors.color2 = frames[frame][1];
@@ -60,13 +60,14 @@ export default class TabTwoScreen extends Component {
       clearInterval(this.myInterval);
       console.log("Stopped!");
     }
-  }, 50);
+  }, 50); */
 
   render() {
     const { color1, color2, color3, color4, color5, color6 } = this.state.colors;
     return (
-      <Surface style={{ width: windowWidth, height: windowHeight }}>
-        <Node
+      
+      <Surface style={{ width: windowWidth, height: windowHeight /2}}>
+        <Node style={{ marginTop: 500, width: windowWidth, height: windowHeight /2}}
           shader={shaders.helloGL}
           uniforms={{
             topleft: color1.map((v) => v / 255),
@@ -77,7 +78,9 @@ export default class TabTwoScreen extends Component {
             bottomright: color6.map((v) => v / 255),
           }}
         />
-      </Surface>
+        
+    </Surface>
+
     );
     // Surface creates the canvas, an area of pixels where you can draw.
     // Node instanciates a "shader program" with the fragment shader defined above.
