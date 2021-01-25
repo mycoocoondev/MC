@@ -18,12 +18,9 @@ const shaders = Shaders.create({
   helloGL: {
     frag: GLSL`
 precision highp float;
-float step1 = 0.50;
-float x = smoothstep(0.20, 0.20, gl_FragCoord.y);
 varying vec2 uv;
 uniform vec3 topleft, topright, bottomleft, bottomright, middleleft, middleright;
 void main() {
-  float percent = uv.y;
   float step1 = 0.0;
   float step2 = 0.5;
   float step3 = 1.0;
